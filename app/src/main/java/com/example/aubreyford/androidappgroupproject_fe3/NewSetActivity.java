@@ -87,7 +87,7 @@ public class NewSetActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-//        fetchJsonResponse();
+        fetchJsonResponse();
     }
 
     @Override
@@ -269,7 +269,7 @@ public class NewSetActivity extends AppCompatActivity {
 
 
 
-    private void fetchJsonResponse(final String picAFileName, final String picBFileName) {
+    private void fetchJsonResponse() {
         // Pass second argument as "null" for GET requests
         Log.d(TAG, "fetchJsonResponse");
 
@@ -301,8 +301,8 @@ public class NewSetActivity extends AppCompatActivity {
                 params.put("voteB", "2");
                 params.put("winnerA", "false");
                 params.put("winnerB", "true");
-                params.put("picA", picAFileName);
-                params.put("picB", picBFileName);
+                params.put("picA", "picA");
+                params.put("picB", "picB");
                 Log.i(TAG, "!!!!!!!!!!!!!!");
                 Log.i(TAG, params.get("picA"));
                 Log.i(TAG, "*******");
@@ -315,51 +315,7 @@ public class NewSetActivity extends AppCompatActivity {
         mRequestQueue.add(req);
     }
 
-    private void uploadFile() {
-        // Pass second argument as "null" for GET requests
-        Log.d(TAG, "fetchJsonResponse");
 
-        StringRequest req = new StringRequest(Request.Method.POST,"https://thisorthatdb.herokuapp.com/new",
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            String result = "Your IP Address is " + response;
-                            Toast.makeText(NewSetActivity.this, result, Toast.LENGTH_SHORT).show();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                VolleyLog.e("Error: ", error.getMessage());
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("user_id", "1");
-                params.put("title", "testTitle");
-                params.put("category", "testCategory");
-                params.put("voteA", "1");
-                params.put("voteB", "2");
-                params.put("winnerA", "false");
-                params.put("winnerB", "true");
-                params.put("picA", "testPicA");
-                params.put("picB", "testPicB");
-                Log.i(TAG, "!!!!!!!!!!!!!!");
-                Log.i(TAG, params.get("picA"));
-                Log.i(TAG, "*******");
-                return params;
-            }
-        };
-
-        /* Add your Requests to the RequestQueue to execute */
-        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
-        mRequestQueue.add(req);
-    }
 
     @Override
     public void onStart() {
