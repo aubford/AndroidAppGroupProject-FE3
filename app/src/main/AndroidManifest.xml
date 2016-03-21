@@ -12,11 +12,15 @@
 
 
     <application
+        android:name="com.example.aubreyford.androidappgroupproject_fe3.app.AppController"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/brand_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
+
 
         <activity
             android:name=".MainActivity"
@@ -43,7 +47,9 @@
             android:name=".NewSetActivity"
             android:theme="@style/AppTheme.NoActionBar">
 
-        </activity><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+        </activity>
+
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
      App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data
             android:name="com.google.android.gms.version"
