@@ -18,6 +18,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.mobileconnectors.s3.transfermanager.TransferManager;
+import com.amazonaws.mobileconnectors.s3.transfermanager.Upload;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -30,9 +38,16 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.transfer.*;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -72,7 +87,7 @@ public class NewSetActivity extends AppCompatActivity {
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        fetchJsonResponse();
+//        fetchJsonResponse();
     }
 
     @Override
@@ -119,12 +134,15 @@ public class NewSetActivity extends AppCompatActivity {
 
     public void Submit() {
 
+
         submitBtn = (Button) findViewById(R.id.new_submit);
 
 
         submitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                String picAFileName;
+                String picBFileName;
 
 
                 ImageView picA = (ImageView) findViewById(R.id.pic_A);
@@ -140,6 +158,9 @@ public class NewSetActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(view.getContext(), index.class);
                 startActivity(intent);
+
+//                uploadAmazonFiles(bitmapA, bitmapB);
+//                fetchJsonResponse(bitmapA, bitmapB);
 //
 //                        image_test = (ImageView) findViewById(R.id.imageTest);
 //                        image_test.setImageBitmap(bitmapB);
@@ -207,10 +228,8 @@ public class NewSetActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             picA.setImageBitmap(imageBitmap);
-            // Store decision and retrieve id from response.
-            // Build filename as "decision" appended with id
-            // Call asynchronous file upload to Amazon with a parameter of this new id.
 
+        Log.i(TAG, "************** on A snap");
         }
 
         if (requestCode == 2 && resultCode == RESULT_OK) {
@@ -218,17 +237,91 @@ public class NewSetActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             picB.setImageBitmap(imageBitmap);
+            Log.i(TAG, "************** on B snap");
 
         }
     }
 
-    private void fetchJsonResponse() {
+
+    private void uploadAmazonFiles(Bitmap picABitmap, Bitmap picBBitmap) {
+        long dateTime = (new Date()).getTime();
+
+        String picAFileName = "picA" + dateTime;
+        String picBFileName = "picB" + dateTime;
+
+        AWSCredentials credentials = new BasicAWSCredentials("AKIAID4WIMSMU3GTGDOA","uE1g4OZABni5/bulBf3f68fdXIK9H22H9o+jw63L");
+//        TransferManager manager = new TransferManageranager(credentials);
+//        Upload upload = manager.upload("thisorthatphotofiles", picAFileName, picABitmap);
+//        Upload upload = manager.upload("thisorthatphotofiles", picBFileName, picBBitmap);
+
+        AmazonS3 s3client = new AmazonS3Client(credentials);
+        Log.i(TAG, "in uploadAmazonFiles");
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        picABitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+
+        s3client.putObject(new PutObjectRequest("thisorthatphotofiles", "AKIAID4WIMSMU3GTGDOA", bs, objectMetadata));
+    }
+
+
+
+    private void fetchJsonResponse(final String picAFileName, final String picBFileName) {
         // Pass second argument as "null" for GET requests
         Log.d(TAG, "fetchJsonResponse");
 
         StringRequest req = new StringRequest(Request.Method.POST,"https://thisorthatdb.herokuapp.com/new",
 
         new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            String result = "Your IP Address is " + response;
+                            Toast.makeText(NewSetActivity.this, result, Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                VolleyLog.e("Error: ", error.getMessage());
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() {
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("user_id", "1");
+                params.put("title", "testTitle");
+                params.put("category", "testCategory");
+                params.put("voteA", "1");
+                params.put("voteB", "2");
+                params.put("winnerA", "false");
+                params.put("winnerB", "true");
+                params.put("picA", picAFileName);
+                params.put("picB", picBFileName);
+                Log.i(TAG, "!!!!!!!!!!!!!!");
+                Log.i(TAG, params.get("picA"));
+                Log.i(TAG, "*******");
+                return params;
+            }
+        };
+
+        /* Add your Requests to the RequestQueue to execute */
+        RequestQueue mRequestQueue = Volley.newRequestQueue(this);
+        mRequestQueue.add(req);
+    }
+
+    private void uploadFile() {
+        // Pass second argument as "null" for GET requests
+        Log.d(TAG, "fetchJsonResponse");
+
+        StringRequest req = new StringRequest(Request.Method.POST,"https://thisorthatdb.herokuapp.com/new",
+
+                new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -268,5 +361,27 @@ public class NewSetActivity extends AppCompatActivity {
         mRequestQueue.add(req);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction2 = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "NewSet Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://com.example.aubreyford.androidappgroupproject_fe3/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction2);
+    }
+    //Generate unique filename from date and time
+    // Build filename as "decision" appended with id
+    // Call asynchronous file upload to Amazon with a parameter of this new id.
 
 }
