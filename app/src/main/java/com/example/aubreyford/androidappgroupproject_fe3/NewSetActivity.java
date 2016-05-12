@@ -359,9 +359,6 @@ public class NewSetActivity extends Activity {
         final String finalPicBFileName = picBFileName;
         final String finalTitle = title;
 
-
-
-
         StringRequest req = new StringRequest(Request.Method.POST,"https://thisorthatdb.herokuapp.com/new",
 
         new Response.Listener<String>() {
