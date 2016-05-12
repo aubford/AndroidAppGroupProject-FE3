@@ -313,11 +313,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             try {
 
                 RequestBody formBody = new FormBody.Builder()
-                        .add("name", mEmail)
+                        .add("email", mEmail)
                         .add("password", mPassword)
                         .build();
 
-                Log.i("******************asdf", "asdf");
                 OkHttpClient client = new OkHttpClient();
 
                 Request request = new Request.Builder()
