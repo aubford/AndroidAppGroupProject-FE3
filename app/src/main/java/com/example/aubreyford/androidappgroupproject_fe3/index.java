@@ -2,7 +2,9 @@ package com.example.aubreyford.androidappgroupproject_fe3;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -35,6 +37,7 @@ import java.util.List;
 public class index extends Activity {
 
     private static Button newQualm;
+    private static Button logout;
     private static Button indexBack;
     ListView mListView;
 
@@ -43,6 +46,8 @@ public class index extends Activity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private SharedPreferences sharedPref;
+    SharedPreferences.Editor sharedEditor;
 
 
 
@@ -53,8 +58,7 @@ public class index extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_index);
 
-
-        NewSetNavListener();
+        SetNavListeners();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -65,13 +69,19 @@ public class index extends Activity {
     protected void onResume() {
         super.onResume();
 
-        new JSONAsyncTask().execute("https://thisorthatdb.herokuapp.com/posters/decisions");
+        sharedPref = getSharedPreferences("quandry", Context.MODE_PRIVATE);
+        sharedEditor = sharedPref.edit();
+        String id = String.valueOf(sharedPref.getInt("user", -1));
+
+        new JSONAsyncTask().execute("https://thisorthatdb.herokuapp.com/posters/decisions/" + id);
         mListView = (ListView)findViewById(R.id.list);
+
 
     }
 
-    public void NewSetNavListener() {
+    public void SetNavListeners() {
         newQualm = (Button) findViewById(R.id.new_qualm);
+        logout = (Button) findViewById(R.id.logout);
 
         newQualm.setOnClickListener(new View.OnClickListener() {
 
@@ -81,8 +91,16 @@ public class index extends Activity {
                 startActivity(intent);
             }
         });
-    }
 
+        logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sharedEditor.remove("user");
+                Intent intent = new Intent(index.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
 
 
     class JSONAsyncTask extends AsyncTask<String, Void, String> {
@@ -191,7 +209,7 @@ public class index extends Activity {
                 int position = (Integer) hm[0].get("positionA");
 
                 Log.i("************IMMAGEURLA", imgUrl);
-                Log.i("*****", "ImageLoaderTaskSTARTB");
+                Log.i("*****", "ImageLoaderTaskSTARTA");
                 URL url;
                 
                 try {
@@ -243,8 +261,6 @@ public class index extends Activity {
                 String imgUrl = (String) hm[0].get("picB_Url");
                 int position = (Integer) hm[0].get("positionB");
 
-                Log.i("************IMMAGEURLB", imgUrl);
-                Log.i("*****", "ImageLoaderTaskSTARTBBB");
                 URL url;
                 try {
                     url = new URL(imgUrl);
@@ -265,7 +281,6 @@ public class index extends Activity {
                     return hmBitmap;
 
                 } catch (Exception e) {
-                    Log.i("************", "ImageLoaderTaskFAILBBBB");
                     e.printStackTrace();
                 }
                 return null;
@@ -282,7 +297,4 @@ public class index extends Activity {
             }
         }
     }
-
-
-
 }

@@ -3,7 +3,9 @@ package com.example.aubreyford.androidappgroupproject_fe3;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -61,6 +63,8 @@ public class NewSetActivity extends Activity {
     private static Button backBtn;
     private Uri uriPicA;
     private Uri uriPicB;
+    private SharedPreferences sharedPref;
+    SharedPreferences.Editor sharedEditor;
     String TAG = NewSetActivity.class.getName();
 
     /**
@@ -265,7 +269,6 @@ public class NewSetActivity extends Activity {
             Log.e("persistImage", "Error writing bitmap", e);
         }
         return imageFile;
-
     }
 
     /*
@@ -356,6 +359,9 @@ public class NewSetActivity extends Activity {
         final String finalPicBFileName = picBFileName;
         final String finalTitle = title;
 
+
+
+
         StringRequest req = new StringRequest(Request.Method.POST,"https://thisorthatdb.herokuapp.com/new",
 
         new Response.Listener<String>() {
@@ -377,10 +383,13 @@ public class NewSetActivity extends Activity {
         }) {
             @Override
             protected Map<String, String> getParams() {
+                sharedPref = getSharedPreferences("quandry", Context.MODE_PRIVATE);
+                sharedEditor = sharedPref.edit();
+                String id = String.valueOf(sharedPref.getInt("user", -1));
                 // Make sure below that the voteA and voteB do not need
                 // to be sent as integer 0.
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("user_id", "1");
+                params.put("user_id", id);
                 params.put("title", finalTitle);
                 params.put("category", "none");
                 params.put("voteA", "0");

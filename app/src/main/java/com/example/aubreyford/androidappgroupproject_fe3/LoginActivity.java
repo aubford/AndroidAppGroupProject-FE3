@@ -311,7 +311,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         protected Boolean doInBackground(Void... params) {
 
             try {
-
                 RequestBody formBody = new FormBody.Builder()
                         .add("email", mEmail)
                         .add("password", mPassword)
@@ -325,27 +324,22 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                         .build();
 
                 Response response = client.newCall(request).execute();
-                Log.i("********response****", String.valueOf(response));
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                 int responseInt = Integer.parseInt(response.body().string());
-                Log.i("******IO-me", String.valueOf(responseInt));
+                Log.i("******response", String.valueOf(responseInt));
                 if(responseInt == -1){
                     return false;
                 }else{
                     sharedEditor.putInt("user", responseInt);
                     sharedEditor.apply();
+                    Log.i("getINT***", String.valueOf(sharedPref.getInt("user", -1)));
                 }
-
             }catch(IOException e){
-
-                Log.i("***********IO-me-2", "IOException");
+                Log.i("****RETURN***ERROR", String.valueOf(e));
                 return false;
-
             }
-
             return true;
-
         }
 
         @Override

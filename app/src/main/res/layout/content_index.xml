@@ -36,12 +36,24 @@
 
 
     <Button
-        android:layout_width="150dp"
+        android:layout_width="wrap_content"
         android:layout_height="60dp"
+        android:weightSum="1"
         android:text="New Quandary"
         android:id="@+id/new_qualm"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@+id/your_decisions"
+        android:layout_alignEnd="@+id/your_decisions" />
+
+    <Button
+        android:weightSum="1"
+        android:layout_width="wrap_content"
+        android:layout_height="60dp"
+        android:text="Logout"
+        android:id="@+id/logout"
+        android:layout_below="@+id/list"
         android:layout_alignEnd="@+id/list"
-        android:layout_alignParentStart="true" />
+        android:layout_toEndOf="@+id/your_decisions" />
 
 </RelativeLayout>
