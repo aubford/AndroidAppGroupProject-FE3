@@ -6,14 +6,15 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:padding="0dp">
 
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/fashion_a"
             android:src="@drawable/fashion_a"
-            />
+            android:padding="0dp" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -48,11 +49,11 @@
         android:layout_weight="1">
 
         <ImageButton
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:id="@+id/fashion_b"
             android:src="@drawable/fashion_b"
-            />
+            android:padding="0dp" />
 
         <TextView
             android:layout_width="wrap_content"

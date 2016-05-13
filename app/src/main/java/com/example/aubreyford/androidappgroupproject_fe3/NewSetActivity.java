@@ -22,7 +22,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferListener;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferObserver;
+import com.amazonaws.mobileconnectors.s3.transferutility.TransferState;
 import com.amazonaws.mobileconnectors.s3.transferutility.TransferUtility;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -77,6 +79,7 @@ public class NewSetActivity extends Activity {
 
     // The TransferUtility is the primary class for managing transfer to S3
     private TransferUtility transferUtility;
+    private int uploadCounter = 0;
 
 
     @Override
@@ -230,6 +233,35 @@ public class NewSetActivity extends Activity {
 
     }
 
+    public void transferObserverListener(TransferObserver transferObserver){
+
+        transferObserver.setTransferListener(new TransferListener(){
+
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                Log.e("statechange", state+"");
+                if(state == TransferState.COMPLETED){
+                    uploadCounter++;
+                    if(uploadCounter == 2){
+                        finish();
+                    }
+                }
+            }
+
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                int percentage = (int) (bytesCurrent/bytesTotal * 100);
+                Log.e("percentage",percentage +"");
+            }
+
+            @Override
+            public void onError(int id, Exception ex) {
+                Log.e("error","error");
+            }
+
+        });
+    }
+
     private void beginUpload(Bitmap bitmap, String filename) {
 
 
@@ -244,6 +276,10 @@ public class NewSetActivity extends Activity {
         file = persistImage(bitmap, filename);
         TransferObserver observer = transferUtility.upload(Constants.BUCKET_NAME, filename,
         file);
+
+        transferObserverListener(observer);
+
+
 
         /*
          * Note that usually we set the transfer listener after initializing the
@@ -262,7 +298,7 @@ public class NewSetActivity extends Activity {
         OutputStream os;
         try {
             os = new FileOutputStream(imageFile);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 65, os);
             os.flush();
             os.close();
         } catch (Exception e) {
@@ -365,9 +401,8 @@ public class NewSetActivity extends Activity {
                     @Override
                     public void onResponse(String response) {
                         try {
-                            String result = "Your IP Address is " + response;
+                            String result = "Uploading Images, please wait";
                             Toast.makeText(NewSetActivity.this, result, Toast.LENGTH_SHORT).show();
-                            finish();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
